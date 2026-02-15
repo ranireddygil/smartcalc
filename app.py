@@ -1,19 +1,22 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
+
 from main import calculate_expression
 
 app = FastAPI()
 
+
+# Optional homepage so visiting the root URL doesn't show {"detail":"Not Found"}
+@app.get("/")
+def root():
+    return {"message": "SmartCalc API is running"}
+
+
 class CalcRequest(BaseModel):
     expression: str
 
+
 @app.post("/calculate")
-def calculate(req: CalcRequest):
-    try:
-        result = calculate_expression(req.expression)
-        return {
-            "expression": req.expression,
-            "result": result
-        }
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+def calculate(payload: CalcRequest):
+    result = calculate_expression(payload.expression)
+    return {"expression": payload.expression, "result": result}
